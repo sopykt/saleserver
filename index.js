@@ -45,7 +45,7 @@ con.connect(function(err){
   } else {
 	console.log('Connection to DB established');
 	//execute a query against the database table employees
-	con.query('SELECT * FROM employees',function(err,rows){
+	con.query('SELECT COLUMNS FROM employees',function(err,rows){
 		if(err) {
 			console.log('error getting query from database');
 		} else {
