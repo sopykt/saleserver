@@ -42,8 +42,18 @@ con.connect(function(err){
   if(err){
     console.log('Error connecting to Db');
     return;
+  } else {
+	console.log('Connection to DB established');
+	//execute a query against the database table employees
+	con.query('SELECT * FROM employees',function(err,rows){
+		if(err) {
+			console.log('error getting query from database');
+		} else {
+			console.log('Data received from Db:\n');
+			console.log(rows);
+		}
+	});  
   }
-  console.log('Connection to DB established');
 });
 
 con.end(function(err) {
@@ -52,15 +62,7 @@ con.end(function(err) {
   // before sending a COM_QUIT packet to the MySQL server.
 });
 
-//execute a query against the database table employees
-con.query('SELECT * FROM employees',function(err,rows){
-  if(err) {
-	  console.log('error getting query from database');
-	  } else {
-  console.log('Data received from Db:\n');
-  console.log(rows);
-	  }
-});
+
 
 // spin spin sugar
 app.listen(app.get('port'), function() {
