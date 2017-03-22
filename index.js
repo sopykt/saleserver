@@ -56,10 +56,10 @@ con.end(function(err) {
 con.query('SELECT * FROM employees',function(err,rows){
   if(err) {
 	  console.log('error getting query from database');
-	  }
-
+	  } else {
   console.log('Data received from Db:\n');
   console.log(rows);
+	  }
 });
 
 // spin spin sugar
