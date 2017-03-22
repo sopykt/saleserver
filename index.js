@@ -54,7 +54,9 @@ con.end(function(err) {
 
 //execute a query against the database table employees
 con.query('SELECT * FROM employees',function(err,rows){
-  if(err) throw err;
+  if(err) {
+	  console.log('error getting query from database');
+	  }
 
   console.log('Data received from Db:\n');
   console.log(rows);
