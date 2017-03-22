@@ -34,7 +34,8 @@ function setCustomCacheControl (res, path) {
 var con = mysql.createConnection({
   host: "db4free.net",
   user: "sopykt",
-  password: sqlpwd
+  password: sqlpwd,
+  database: "saleserver"
 });
 
 con.connect(function(err){
@@ -42,13 +43,21 @@ con.connect(function(err){
     console.log('Error connecting to Db');
     return;
   }
-  console.log('Connection established');
+  console.log('Connection to DB established');
 });
 
 con.end(function(err) {
   // The connection is terminated gracefully
   // Ensures all previously enqueued queries are still
   // before sending a COM_QUIT packet to the MySQL server.
+});
+
+//execute a query against the database table employees
+con.query('SELECT * FROM employees',function(err,rows){
+  if(err) throw err;
+
+  console.log('Data received from Db:\n');
+  console.log(rows);
 });
 
 // spin spin sugar
