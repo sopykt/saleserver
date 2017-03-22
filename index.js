@@ -5,6 +5,8 @@ const bodyParser = require('body-parser')
 const request = require('request')
 const app = express()
 const serveStatic = require('serve-static')
+const mysql = require('mysql')
+const sqlpwd = (process.env.MySQL_PASSWORD)
 
 // set port for server to serve
 app.set('port', (process.env.PORT || 5000))
@@ -27,6 +29,27 @@ function setCustomCacheControl (res, path) {
     res.setHeader('Cache-Control', 'public, max-age=0')
   }
 }
+
+//Create connection to mysqlserver
+var con = mysql.createConnection({
+  host: "db4free.net",
+  user: "sopykt",
+  password: sqlpwd
+});
+
+con.connect(function(err){
+  if(err){
+    console.log('Error connecting to Db');
+    return;
+  }
+  console.log('Connection established');
+});
+
+con.end(function(err) {
+  // The connection is terminated gracefully
+  // Ensures all previously enqueued queries are still
+  // before sending a COM_QUIT packet to the MySQL server.
+});
 
 // spin spin sugar
 app.listen(app.get('port'), function() {
