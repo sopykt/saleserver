@@ -1,0 +1,361 @@
+
+
+NoSQL databases are all the rage these days and probably the preferred back-end for Node.js applications. But you shouldn’t architect your next project based on what’s hip and trendy, rather the type of database to be used should depend on the project’s requirements. If your project involves dynamic table creation, real time inserts etc. then NoSQL is the way to go, but on the other hand, if your project deals with complex queries and transactions, then a SQL make much more sense.
+
+In this tutorial, we’ll have a look at getting started with the node-mysql module — a Node.js driver for MySQL, written in JavaScript. I’ll explain how to use the module to connect to a MySQL database, perform the usual CRUD operations, before examining stored procedures and escaping user input.
+Installing node-mysql
+
+node-mysql can be installed via npm. We can get up and running like so:
+
+mkdir sp-node-mysql
+cd sp-node-mysql
+npm install mysql
+
+If you need help using npm, then be sure to check out this article, or ask in our forums.
+Getting Started
+
+Once you are done installing node-mysql module, you are good to go. For this demo I’ll be using a database called sitepoint and a table called employees. Here’s a dump of the database, so that you can get up and running quickly, if you wish to follow along:
+
+CREATE TABLE employees (
+  id int(11) NOT NULL AUTO_INCREMENT,
+  name varchar(50),
+  location varchar(50),
+  PRIMARY KEY (id)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;
+
+INSERT INTO employees (id, name, location) VALUES
+(1, 'Jasmine', 'Australia'),
+(2, 'Jay', 'India'),
+(3, 'Jim', 'Germany'),
+(4, 'Lesley', 'Scotland');
+
+Now, let’s create a file called app.js in our sp-node-mysql directory and see how to connect to MySQL from Node.js.
+
+app.js
+
+var mysql = require("mysql");
+
+// First you need to create a connection to the db
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "jay",
+  password: "jay"
+});
+
+con.connect(function(err){
+  if(err){
+    console.log('Error connecting to Db');
+    return;
+  }
+  console.log('Connection established');
+});
+
+con.end(function(err) {
+  // The connection is terminated gracefully
+  // Ensures all previously enqueued queries are still
+  // before sending a COM_QUIT packet to the MySQL server.
+});
+
+Now open up a terminal and enter node app.js. Once the connection is successfully established you should be able to see the “Connection established” message in the console. If something goes wrong (for example you enter the wrong password), a callback is fired, which is passed an instance of the JavaScript Error object (err). Try logging this to the console to see what additional useful information it contains.
+Pro Tip
+
+If JavaScript task runners are your thing, you can watch the file app.js for changes and have the task runner execute it every time a change is detected.
+
+Here’s how you might do that with Grunt.
+
+package.json
+
+{
+  "name": "sp-node-mysql",
+  "version": "0.1.0",
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-execute": "^0.2.2",
+  }
+}
+
+Gruntfile.js
+
+module.exports = function (grunt) {
+  grunt.initConfig({
+    execute: {
+      target: {
+        src: ['app.js']
+      }
+    },
+    watch: {
+      scripts: {
+        files: ['app.js'],
+        tasks: ['execute'],
+      },
+    }
+  });
+
+  grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-execute');
+};
+
+Then run npm install, followed by grunt watch.
+Executing Queries
+Reading
+
+Now that you know how to establish a connection to MySQL from Node.js, let’s see how to execute SQL queries. We’ll start by specifying the database name (sitepoint) in the createConnection command.
+
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "jay",
+  password: "jay",
+  database: "sitepoint"
+});
+
+Once the connection is established we’ll use the connection variable to execute a query against the database table employees.
+
+con.query('SELECT * FROM employees',function(err,rows){
+  if(err) throw err;
+
+  console.log('Data received from Db:\n');
+  console.log(rows);
+});
+
+When you run app.js (either using grunt-watch or by typing node app.js into your terminal), you should be able to see the data returned from database logged to the terminal.
+
+[ { id: 1, name: 'Jasmine', location: 'Australia' },
+  { id: 2, name: 'Jay', location: 'India' },
+  { id: 3, name: 'Jim', location: 'Germany' },
+  { id: 4, name: 'Lesley', location: 'Scotland' } ]
+
+Data returned from the MySQL database can be parsed by simply lopping over the rows object.
+
+for (var i = 0; i < rows.length; i++) {
+  console.log(rows[i].name);
+};
+
+Creating
+
+You can execute an insert query against a database, like so:
+
+var employee = { name: 'Winnie', location: 'Australia' };
+con.query('INSERT INTO employees SET ?', employee, function(err,res){
+  if(err) throw err;
+
+  console.log('Last insert ID:', res.insertId);
+});
+
+Note how we can get the ID of the inserted record using the callback parameter.
+Updating
+
+Similarly, when executing an update query, the number of rows affected can be retrieved using result.affectedRows:
+
+con.query(
+  'UPDATE employees SET location = ? Where ID = ?',
+  ["South Africa", 5],
+  function (err, result) {
+    if (err) throw err;
+
+    console.log('Changed ' + result.changedRows + ' rows');
+  }
+);
+
+Destroying
+
+Same thing goes for a delete query:
+
+con.query(
+  'DELETE FROM employees WHERE id = ?',
+  [5],
+  function (err, result) {
+    if (err) throw err;
+
+    console.log('Deleted ' + result.affectedRows + ' rows');
+  }
+);
+
+Advanced Use
+
+I’d like to finish off by looking at how node-mysql handles stored procedures and the escaping of user input.
+Stored Procedures
+
+Put simply, a stored procedure is a procedure (written in, for example, SQL) stored in a database which can be called by the database engine and connected programming languages. If you are in need of a refresher, then please check out this excellent article.
+
+Let’s create a stored procedure for our sitepoint database which fetches all the employee details. We’ll call it sp_getall . To do this, you’ll need some kind of interface to the database. I’m using phpMyAdmin. Run the following query on the sitepoint database:
+
+DELIMITER $$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_getall`()
+BEGIN
+    SELECT id, name, location FROM employees;
+END
+
+This will create and store the procedure in the information_schema database in the ROUTINES table.
+
+Next, establish a connection and use the connection object to call the stored procedure as shown:
+
+con.query('CALL sp_getall()',function(err,rows){
+  if (err) throw err;
+
+  console.log('Data received from Db:\n');
+  console.log(rows);
+});
+
+Save the changes and run the file. Once executed you should be able to view the data returned from the database.
+
+[ [ { id: 1, name: 'Jasmine', location: 'Australia' },
+    { id: 2, name: 'Jay', location: 'India' },
+    { id: 3, name: 'Jim', location: 'Germany' },
+    { id: 4, name: 'Lesley', location: 'Scotland' } ],
+  { fieldCount: 0,
+    affectedRows: 0,
+    insertId: 0,
+    serverStatus: 34,
+    warningCount: 0,
+    message: '',
+    protocol41: true,
+    changedRows: 0 } ]
+
+Along with the data, it returns some additional information, such as the affected number of rows, insertId etc. You need to iterate over the 0th index of the returned data to get employee details separated from the rest of the information.
+
+for (var i = 0; i < rows[0].length; i++) {
+  console.log(rows[0][i].name);
+};
+
+Now lets consider a stored procedure which requires an input parameter.
+
+DELIMITER $$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_get_employee_detail`(
+  in employee_id int
+)
+BEGIN
+  SELECT name, location FROM employees where id = employee_id;
+END
+
+Now we can pass the input parameter while making a call to the stored procedure:
+
+connection.query('CALL sp_get_employee_detail(1)',function(err,rows){
+  if(err) throw err;
+
+  console.log('Data received from Db:\n');
+  console.log(rows[0]);
+});
+
+Most of the time when we try to insert a record into the database, we need the last inserted ID to be returned as an out parameter. Consider the following insert stored procedure with an out parameter:
+
+DELIMITER $$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_insert_employee`(
+  out employee_id int,
+  in employee_name varchar(25),
+  in employee_location varchar(25)
+)
+BEGIN
+  insert into employees(name, location)
+  values(employee_name, employee_location);
+  set employee_id = LAST_INSERT_ID();
+END
+
+To make a procedure call with an out parameter, we first need to enable multiple calls while creating the connection. So, modify the connection by setting the multiple statement execution to true.
+
+var con = mysql.createConnection({
+  host: "localhost",
+  user: "jay",
+  password: "jay",
+  database: "sitepoint",
+  multipleStatements: true
+});
+
+Next when making a call to the procedure, set an out parameter and pass it in.
+
+con.query(
+  'SET @employee_id = 0; CALL sp_insert_employee2(@employee_id, "Ron", "USA"); SELECT @employee_id',
+  function(err,rows){
+    if (err) throw err;
+
+    console.log('Data received from Db:\n');
+    console.log(rows);
+  }
+);
+
+As seen in the above code, we have set an out parameter @employee_id and passed it while making a call to the stored procedure. Once the call has been made we need to select the out parameter to access the returned ID.
+
+Run app.js. On successful execution you should be able to see the selected out parameter along with various other information. rows[2] should give you access to the selected out parameter.
+
+[ { '@employee_id': 6 } ]
+
+Escaping User Input
+
+In order to avoid SQL Injection attacks, you should always escape any data from user land before using it inside a SQL query. Let’s demonstrate why:
+
+var userLandVariable = '4 ';
+
+con.query(
+  'SELECT * FROM employees WHERE id =' + userLandVariable, 
+  function(err,rows){
+    if(err) throw err;
+    console.log(rows);
+  }
+);
+
+This seems harmless enough and even returns the correct result:
+
+{ id: 4, name: 'Lesley', location: 'Scotland' }
+
+However, if we change the userLandVariable to this:
+
+var userLandVariable = '4 OR 1=1';
+
+we suddenly have access to the entire data set. If we then change it to this:
+
+var userLandVariable = '4; DROP TABLE employees';
+
+then we’re in proper trouble!
+
+The good news is that help is at hand. You just have to use the mysql.escape() method:
+
+con.query(
+  'SELECT * FROM employees WHERE id =' + mysql.escape(userLandVariable), 
+  function(err,rows){ ... }
+);
+
+Or by using a question mark placeholder, as we did in the examples at the beginning of the article:
+
+con.query(
+  'SELECT * FROM employees WHERE id = ?', 
+  [userLandVariable], 
+  function(err,rows){ ... }
+);
+
+Conclusion
+
+In this tutorial, we’ve only scratched the surface of what the node-mysql client offers. For more detailed information, I would recommend reading the official documentation. There are other options too, such as node-mysql2 and node-mysql-libmysqlclient.
+
+Have you used any of these options for connecting to MySQL from Node.js? I would love hear them. Do let us know your thoughts, suggestions and corrections in the comments below!
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+DELIMITER //
+CREATE PROCEDURE ss_getall()
+BEGIN
+SELECT id, name, location FROM employees;
+END //
+
+DELIMITER //
+CREATE PROCEDURE ss_get_emp_detail(in employee_name CHAR(20))
+BEGIN
+SELECT location FROM employees WHERE name = employee_name;
+END //
+
+
+alter table tbl_doctors change location day char(10);
+
+
+update tbl_doctors set day = 'sunday' where name = 'Jasmine';
