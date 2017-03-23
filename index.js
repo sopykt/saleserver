@@ -56,7 +56,7 @@ con.query('SELECT * FROM employees',function(err, results){
 		if(err) {
 			console.log('error getting query from database');
 		} else {
-			console.log(results);
+			console.log('These are results:\n' + results);
 		}
 	});  
 
