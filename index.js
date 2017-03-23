@@ -38,6 +38,7 @@ var con = mysql.createConnection({
   database: "saleserver"
 });
 
+/*
 con.connect(function(err){
   if(err){
     console.log('Error connecting to Db');
@@ -45,23 +46,27 @@ con.connect(function(err){
   } else {
 	console.log('Connection to DB established');
 	//execute a query against the database table employees
-	con.query('SELECT COLUMNS FROM employees',function(err,rows){
+	
+  }
+});
+*/
+
+//execute a query against the database table employees
+con.query('SELECT COLUMNS FROM employees',function(err,rows){
 		if(err) {
 			console.log('error getting query from database');
 		} else {
-			console.log('Data received from Db:\n');
-			console.log(rows);
+			console.log('Data received from Db:\n' + rows);
 		}
 	});  
-  }
-});
 
+/*
 con.end(function(err) {
   // The connection is terminated gracefully
   // Ensures all previously enqueued queries are still
   // before sending a COM_QUIT packet to the MySQL server.
 });
-
+*/
 
 
 // spin spin sugar
