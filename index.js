@@ -52,7 +52,7 @@ con.connect(function(err){
 */
 
 //execute a query against the database table employees
-con.query('SELECT COLUMNS FROM employees',function(err,rows){
+con.query('SELECT * FROM employees',function(err,rows){
 		if(err) {
 			console.log('error getting query from database');
 		} else {
