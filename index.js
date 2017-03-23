@@ -53,13 +53,11 @@ con.connect(function(err){
 
 //execute a query against the database table employees
 
-con.query('UPDATE tbl_doctors SET name = ? WHERE id = 1', ['စိုးပိုင်'], function(err, rows)	{
+con.query('UPDATE tbl_doctors SET name = ? WHERE id = 1', ['စိုးပိုင်'], function(err, results)	{
 		if(err) {
 			console.log('error updating name');
 		} else {
-			for (var i = 0; i < rows.length; i++) {
-			console.log(rows[i].name);
-			};
+			console.log('Changed ' + result.changedRows + ' rows');
 		}
 	});  
 
