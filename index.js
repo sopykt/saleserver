@@ -52,6 +52,7 @@ con.connect(function(err){
 */
 
 //execute a query against the database table employees
+/*
 con.query('SELECT * FROM employees',function(err, rows){
 		if(err) {
 			console.log('error getting query from database');
@@ -61,6 +62,17 @@ con.query('SELECT * FROM employees',function(err, rows){
 			};
 		}
 	});  
+*/
+
+//insert query against a database
+var employee = { name: 'Winnie', location: 'Australia' };
+con.query('INSERT INTO employees SET ?', employee, function(err,res){
+  if(err) {
+	  console.log('error inserting new employee');
+	  } else {
+		console.log('Last insert ID:', res.insertId);
+		}
+});
 
 /*
 con.end(function(err) {
