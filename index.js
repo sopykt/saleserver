@@ -31,14 +31,22 @@ function setCustomCacheControl (res, path) {
 }
 
 //Create connection to mysqlserver
-var con = mysql.createConnection({
+/*var con = mysql.createConnection({
   host: "db4free.net",
   user: "sopykt",
   password: sqlpwd,
   database: "saleserver"
 });
+*/
 
-/*
+//byethost sql
+var con = mysql.createConnection({
+  host: "sql100.byethost7.com",
+  user: "b7_19863613",
+  password: sqlpwd,
+  database: "b7_19863613_o463"
+});
+
 con.connect(function(err){
   if(err){
     console.log('Error connecting to Db');
@@ -49,10 +57,10 @@ con.connect(function(err){
 	
   }
 });
-*/
+
 
 //execute a query against the database table employees
-
+/*
 con.query('UPDATE tbl_doctors SET name = ? WHERE id = 1', ['စိုးပိုင်'], function(err, result)	{
 		if(err) {
 			console.log('error updating name');
@@ -60,7 +68,7 @@ con.query('UPDATE tbl_doctors SET name = ? WHERE id = 1', ['စိုးပိ�
 			console.log('Changed ' + result.changedRows + ' rows');
 		}
 	});  
-
+*/
 
 //insert query against a database
 /*
