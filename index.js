@@ -53,7 +53,7 @@ con.connect(function(err){
 
 //execute a query against the database table employees
 
-con.query('UPDATE tbl_doctors SET name = ? WHERE id = 1', ['စိုးပိုင်'], function(err, results)	{
+con.query('UPDATE tbl_doctors SET name = ? WHERE id = 1', ['စိုးပိုင်'], function(err, result)	{
 		if(err) {
 			console.log('error updating name');
 		} else {
