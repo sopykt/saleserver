@@ -31,21 +31,22 @@ function setCustomCacheControl (res, path) {
 }
 
 //Create connection to mysqlserver
-/*var con = mysql.createConnection({
+var con = mysql.createConnection({
   host: "db4free.net",
   user: "sopykt",
   password: sqlpwd,
   database: "saleserver"
 });
-*/
+
 
 //byethost sql
-var con = mysql.createConnection({
+/*var con = mysql.createConnection({
   host: "sql100.byethost7.com",
   user: "b7_19863613",
   password: sqlpwd,
   database: "b7_19863613_o463"
 });
+*/
 
 con.connect(function(err){
   if(err){
@@ -71,16 +72,16 @@ con.query('UPDATE tbl_doctors SET name = ? WHERE id = 1', ['စိုးပိ�
 */
 
 //insert query against a database
-/*
-var employee = { name: 'Winnie', location: 'Australia' };
-con.query('INSERT INTO employees SET ?', employee, function(err,res){
+
+var adoctor = { name: 'soe', designation: 'micro', day: 'monday', start_time: '0800', end_time: '1500' };
+con.query('INSERT INTO tbl_doctors SET ?', adoctor, function(err,res){
   if(err) {
-	  console.log('error inserting new employee');
+	  console.log('error inserting new doctor');
 	  } else {
 		console.log('Last insert ID:', res.insertId);
 		}
 });
-*/
+
 
 /*
 con.end(function(err) {
